@@ -49,7 +49,8 @@ for (forest in Forests){
     ungroup() %>%
     select(-FORESTNAME) %>%
     arrange(desc(`Mean PFRID`))
-  write.csv(f1, paste("TabsFigs/",forest," Table 1.csv", sep=""), row.names = F)
+  forest2 <- gsub(" ", "", forest, fixed = TRUE)
+  write.csv(f1, paste("TabsFigs/",forest2,"Table1.csv", sep=""), row.names = F)
 }
 
 # Calculate % forest in each CC and % of total in diff regimes-------------------
@@ -81,7 +82,8 @@ for (forest in Forests){
     coord_flip() +
     ylab("% of Forest") +
     xlab("Presettlement Fire Regime Group")
-  ggsave(paste("Code/TabsFigs/",forest," CCstackedbar.jpg"), plot=p1,
+  forest2 <- gsub(" ", "", forest, fixed = TRUE)
+  ggsave(paste("Code/TabsFigs/",forest2,"CCstackedbar.jpg", sep=""), plot=p1,
          width = 7, height = 4.5, units = 'in')
 }
 
@@ -111,7 +113,8 @@ for (forest in Forests){
           legend.position="right",
           legend.margin=margin(0,0,0,0),
           legend.box.margin=margin(-10,0,-10,-20))
-  ggsave(paste("Code/TabsFigs/",forest," CCpiechart.jpg"), plot=p1,
+  forest2 <- gsub(" ", "", forest, fixed = TRUE)
+  ggsave(paste("Code/TabsFigs/",forest2,"CCpiechart.jpg", sep=""), plot=p1,
          width = 7, height = 4.5, units = 'in')
 }
 
