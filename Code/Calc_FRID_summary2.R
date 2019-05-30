@@ -121,7 +121,7 @@ for (forest in Forests){
 # Make a map for each forest
 # trying out new dev version of ggplot2, which works with sf objects
 #devtools::install_github("tidyverse/ggplot2")
-library(ggplot2)
+#library(ggplot2)
 
 SB <- map %>% filter(FORESTNAME=="San Bernardino National Forest"&
                        meanCC_FRI!=-999) %>%
@@ -154,6 +154,73 @@ ggplot(data=SB) +
                          height = unit(.3, "in"), width = unit(.3, "in"),
                          style = north_arrow_fancy_orienteering) +
   ggtitle("2017 Percent Fire Return Interval Departures (PFRID): San Bernadino NF")
+
+# Try adding a basemap
+library(ggmap)
+register_google(key="AIzaSyBq49cZHxpxtbCwtL12PLi2NIwGi-K-ZV8")
+bb <- st_bbox(SB)
+myLocation <- c(median(bb$xmax, bb$xmin), median(bb$ymax,bb$ymin))
+myMap <- get_map(location=myLocation, source="osm", color="bw", crop=F)
+ggmap(myMap)
+################################################################################
+# Can I make a fanicer map with leaflet or ggmap?
+################################################################################
+# Try to make faster
+map <- st_read("C:/GIS/FRID17/FRID_justFS_dissolve.shp")
+
+pal_fun <- colorQuantile("YlOrRd", NULL, n = 5)
+colors=c("red3","yellow","palegreen", "turquoise2","royalblue4")
+
+p_popup <- paste0("<strong>Condition Class: </strong>", SB$CC)
+######################################3
+SJ <- SB %>% filter(DISTRICTNA=="San Jacinto Ranger District")
+pal <- colorFactor(
+  palette = c("red3","yellow","palegreen", "turquoise2","royalblue4"),
+  domain = NULL
+)
+
+m <- leaflet(SJ) %>% addTiles() 
+m %>% addProviderTiles(providers$Stamen.Toner)
+m %>% addProviderTiles(providers$CartoDB.Positron)
+m %>% addProviderTiles(providers$MtbMap) %>%
+  addProviderTiles(providers$Stamen.TonerLines,
+                   options = providerTileOptions(opacity = 0.35)) %>%
+  addProviderTiles(providers$Stamen.TonerLabels)
+m
+
+palcat <- colorFactor(SJ$CC)
+m %>% addPolygons(data=SJ,
+                        fillColor = ~pal(CC),
+                        stroke = FALSE,
+                        fillOpacity = .8, smoothFactor = 0.5) %>%
+  addLegend(#pal=pal, values=~CC, 
+            opacity = 1,
+            title="Condition Class",
+            colors=c("#CD0000", "#FFFF00","#98FB98", "#00E5EE","#27408B"),
+            labels=c("3 (Too little fire)","2","1/-1","-2","-3 (Too much fire)"))
+
+
+
+
+  #addLegend(pal = pal, values = ~CC, opacity = 1.0)
+           # labFormat = labelFormat(transform = function(x) round(10^x)))
+  addLegend(labels=c("3 (Too little fire)","2","1/-1","-2","-3 (Too much fire)"),
+            colors=c("#98FB98", "#00E5EE", "#FFFF00", "#27408B", "#CD0000"))
+
+m2
+head(SB)
+
+leaflet(SB) %>%
+  addPolygons(
+    featureId = CC,
+    stroke = FALSE, # remove polygon borders
+    fillColor = c("red3","yellow","palegreen", "turquoise2","royalblue4"), # set fill color with function from above and value
+    fillOpacity = 0.8, smoothFactor = 0.5)
+
+, # make it nicer
+    popup = p_popup) %>%
+  addTiles("http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png")
+  addTiles()
 
 
 # Could I do a sankey diagram?
